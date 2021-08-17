@@ -432,7 +432,7 @@ abstract contract Blacklistable is Ownable {
      * @dev Adds account to blacklist
      */
     function blacklist(address account) external onlyOwner {
-        require(!blacklisted[account], "BEP20Blacklistable: blacklisted");
+        require(!blacklisted[account], "BEP20: blacklisted");
         blacklisted[account] = true;
         emit Blacklisted(account);
     }
@@ -441,7 +441,7 @@ abstract contract Blacklistable is Ownable {
      * @dev Removes account from blacklist
      */
     function unBlacklist(address account) external onlyOwner {
-        require(blacklisted[account], "BEP20Blacklistable: not blacklisted");
+        require(blacklisted[account], "BEP20: not blacklisted");
         blacklisted[account] = false;
         emit UnBlacklisted(account);
     }
@@ -613,7 +613,6 @@ contract BEP20YAY is Context, IBEP20, Blacklistable, Pausable {
     * - `msg.sender` must be the token owner
     */
     function mint(uint256 amount) external onlyOwner returns(bool) {
-        require(_totalSupply.add(amount) <= _cap, "BEP20Capped: cap exceeded");
         _mint(_msgSender(), amount);
         return true;
     }
@@ -655,8 +654,9 @@ contract BEP20YAY is Context, IBEP20, Blacklistable, Pausable {
     * See {_burn} and {_approve}.
     */
     function burnFrom(address account, uint256 amount) external {
+        uint256 decreasedAllowance = _allowances[account][_msgSender()].sub(amount, "BEP20: burn amount exceeds allowance");
+        _approve(account, _msgSender(), decreasedAllowance);
         _burn(account, amount);
-        _approve(account, _msgSender(), _allowances[account][_msgSender()].sub(amount, "BEP20: burn amount exceeds allowance"));
     }
 
     /**
@@ -695,6 +695,7 @@ contract BEP20YAY is Context, IBEP20, Blacklistable, Pausable {
     */
     function _mint(address account, uint256 amount) internal {
         require(account != address(0), "BEP20: mint to the zero address");
+        require(_totalSupply.add(amount) <= _cap, "BEP20: cap exceeded");
 
         _beforeTokenTransfer(address(0), account);
 
@@ -760,8 +761,8 @@ contract BEP20YAY is Context, IBEP20, Blacklistable, Pausable {
      */
     function _beforeTokenTransfer(address from, address to) internal view {
         if (_msgSender() != owner()) {
-            require(!paused(), "BEP20Pausable: token transfer while paused");
-            require(!isBlacklisted(from) && !isBlacklisted(to), "BEP20Blacklistable: account is blacklisted");
+            require(!paused(), "BEP20: token transfer while paused");
+            require(!isBlacklisted(from) && !isBlacklisted(to), "BEP20: account is blacklisted");
         }
     }
 }
