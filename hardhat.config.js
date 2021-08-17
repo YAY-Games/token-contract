@@ -1,6 +1,7 @@
 require("@nomiclabs/hardhat-web3");
 require("@nomiclabs/hardhat-truffle5");
 require('dotenv').config()
+require("solidity-coverage");
 
 const getEnv = env => {
   const value = process.env[env];
@@ -17,21 +18,23 @@ task("accounts", "Prints accounts", async (_, { web3 }) => {
 
 module.exports = {
   // defaultNetwork: "hardhat",
-  // networks: {
-  //   hardhat: {
-  //   },
-  //   production: {
-  //     url: getEnv('RPC_URL'),
-  //     accounts: [getEnv('PRIVATE_KEY')]
-  //   },
-  // },
+  networks: {
+    hardhat: {
+      hardfork: "istanbul"
+    },
+    // production: {
+    //   url: getEnv('RPC_URL'),
+    //   accounts: [getEnv('PRIVATE_KEY')]
+    // },
+  },
   solidity: {
     version: "0.6.12",
     settings: {
       optimizer: {
         enabled: true,
         runs: 200
-      }
+      },
+      evmVersion: "istanbul"
     }
   },
 };

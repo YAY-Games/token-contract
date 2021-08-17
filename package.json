@@ -27,6 +27,7 @@
     "dotenv": "^10.0.0",
     "hardhat": "^2.6.0",
     "solhint": "^3.3.6",
+    "solidity-coverage": "^0.7.13",
     "web3": "^1.5.1"
   }
 }
