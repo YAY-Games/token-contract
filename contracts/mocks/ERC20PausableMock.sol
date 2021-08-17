@@ -9,14 +9,6 @@ contract ERC20PausableMock is BEP20YAY {
     constructor () public BEP20YAY() {
     }
 
-    function pauseMock() external {
-        _pause();
-    }
-
-    function unpauseMock() external {
-        _unpause();
-    }
-
     function mint(address to, uint256 amount) public {
         _mint(to, amount);
     }

@@ -28,8 +28,8 @@ contract('ERC20Pausable', function (accounts) {
       });
 
       it('allows to transfer when paused and then unpaused', async function () {
-        await this.token.pauseMock();
-        await this.token.unpauseMock();
+        await this.token.pause();
+        await this.token.unpause();
 
         await this.token.transfer(recipient, initialSupply, { from: holder });
 
@@ -38,7 +38,7 @@ contract('ERC20Pausable', function (accounts) {
       });
 
       it('reverts when trying to transfer when paused', async function () {
-        await this.token.pauseMock();
+        await this.token.pause();
 
         await expectRevert(this.token.transfer(recipient, initialSupply, { from: holder }),
           'BEP20: token transfer while paused',
@@ -61,8 +61,8 @@ contract('ERC20Pausable', function (accounts) {
       });
 
       it('allows to transfer when paused and then unpaused', async function () {
-        await this.token.pauseMock();
-        await this.token.unpauseMock();
+        await this.token.pause();
+        await this.token.unpause();
 
         await this.token.transferFrom(holder, recipient, allowance, { from: anotherAccount });
 
@@ -71,7 +71,7 @@ contract('ERC20Pausable', function (accounts) {
       });
 
       it('reverts when trying to transfer from when paused', async function () {
-        await this.token.pauseMock();
+        await this.token.pause();
 
         await expectRevert(this.token.transferFrom(
           holder, recipient, allowance, { from: anotherAccount }), 'BEP20: token transfer while paused',
@@ -89,8 +89,8 @@ contract('ERC20Pausable', function (accounts) {
       });
 
       it('allows to mint when paused and then unpaused', async function () {
-        await this.token.pauseMock();
-        await this.token.unpauseMock();
+        await this.token.pause();
+        await this.token.unpause();
 
         await this.token.mint(recipient, amount);
 
@@ -98,7 +98,7 @@ contract('ERC20Pausable', function (accounts) {
       });
 
       it('reverts when trying to mint when paused', async function () {
-        await this.token.pauseMock();
+        await this.token.pause();
 
         await expectRevert(this.token.mint(recipient, amount, {from: recipient}),
           'BEP20: token transfer while paused',
@@ -116,8 +116,8 @@ contract('ERC20Pausable', function (accounts) {
       });
 
       it('allows to burn when paused and then unpaused', async function () {
-        await this.token.pauseMock();
-        await this.token.unpauseMock();
+        await this.token.pause();
+        await this.token.unpause();
 
         await this.token.burn(holder, amount);
 
@@ -125,7 +125,7 @@ contract('ERC20Pausable', function (accounts) {
       });
 
       it('reverts when trying to burn when paused', async function () {
-        await this.token.pauseMock();
+        await this.token.pause();
 
         await expectRevert(this.token.burn(amount, { from: holder }),
           'BEP20: token transfer while paused',
