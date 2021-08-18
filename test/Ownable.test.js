@@ -16,6 +16,7 @@ contract('Ownable', function (accounts) {
 
   it('has an owner', async function () {
     expect(await this.ownable.owner()).to.equal(owner);
+    expect(await this.ownable.getOwner()).to.equal(owner);
   });
 
   describe('transfer ownership', function () {
@@ -24,6 +25,7 @@ contract('Ownable', function (accounts) {
       expectEvent(receipt, 'OwnershipTransferred');
 
       expect(await this.ownable.owner()).to.equal(other);
+      expect(await this.ownable.getOwner()).to.equal(other);
     });
 
     it('prevents non-owners from transferring', async function () {

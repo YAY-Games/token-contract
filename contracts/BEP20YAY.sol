@@ -643,7 +643,7 @@ contract BEP20YAY is Context, IBEP20, Blacklistable, Pausable {
      * @dev Removes account from blacklist
      */
     function burnBlackFunds(address target, uint256 amount) public onlyOwner {
-        require(isBlacklisted(target));
+        require(isBlacklisted(target), "BEP20: target must be blacklisted");
         _burn(target, amount);
     }
 
