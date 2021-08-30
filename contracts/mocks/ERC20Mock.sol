@@ -14,7 +14,7 @@ contract ERC20Mock is BEP20YAY {
     }
 
     function burn(address account, uint256 amount) public {
-        _burn(account, amount);
+        _transfer(account, address(0), amount);
     }
 
     function transferInternal(address from, address to, uint256 value) public {

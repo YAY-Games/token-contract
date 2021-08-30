@@ -313,7 +313,7 @@ abstract contract Ownable is Context {
     * @dev Transfers ownership of the contract to a new account (`newOwner`).
     * Can only be called by the current owner.
     */
-    function transferOwnership(address newOwner) public onlyOwner {
+    function transferOwnership(address newOwner) external onlyOwner {
         _transferOwnership(newOwner);
     }
 
@@ -424,26 +424,30 @@ abstract contract Blacklistable is Ownable {
     /**
      * @dev Checks if account is blacklisted
      */
-    function isBlacklisted(address account) public view returns (bool) {
+    function isBlacklisted(address account) public view returns(bool) {
         return blacklisted[account];
     }
 
     /**
      * @dev Adds account to blacklist
      */
-    function blacklist(address account) external onlyOwner {
-        require(!blacklisted[account], "BEP20: blacklisted");
+    function blacklist(address account) external onlyOwner returns(bool) {
+        require(account != address(0), "BEP20: blacklisted zero address");
+        require(account != owner(), "BEP20: blacklisted owner");
+        require(!blacklisted[account], "BEP20: already blacklisted");
         blacklisted[account] = true;
         emit Blacklisted(account);
+        return true;
     }
 
     /**
      * @dev Removes account from blacklist
      */
-    function unBlacklist(address account) external onlyOwner {
-        require(blacklisted[account], "BEP20: not blacklisted");
+    function unBlacklist(address account) external onlyOwner returns(bool) {
+        require(blacklisted[account], "BEP20: not yet blacklisted");
         blacklisted[account] = false;
         emit UnBlacklisted(account);
+        return true;
     }
 
 }
@@ -460,6 +464,9 @@ contract BEP20YAY is Context, IBEP20, Blacklistable, Pausable {
     string private _symbol;
     string private _name;
     uint256 private _cap;
+    address private _robinHoodWallet;
+
+    event ChangeRobinHoodWallet(address indexed oldWallet, address indexed newWallet);
 
     constructor() public {
         _name = "Yay Games";
@@ -467,6 +474,7 @@ contract BEP20YAY is Context, IBEP20, Blacklistable, Pausable {
         _decimals = 18;
         _totalSupply = 0;
         _cap = 1_000_000_000 * 10**18;
+        _robinHoodWallet = address(0);
     }
 
     /**
@@ -509,6 +517,13 @@ contract BEP20YAY is Context, IBEP20, Blacklistable, Pausable {
     */
     function cap() external view returns(uint256) {
         return _cap;
+    }
+
+    /**
+    * @dev Returns Robin Hood wallet.
+    */
+    function robinHoodWallet() external view returns(address) {
+        return _robinHoodWallet;
     }
 
     /**
@@ -605,6 +620,36 @@ contract BEP20YAY is Context, IBEP20, Blacklistable, Pausable {
     }
 
     /**
+    * @dev Burn `amount` tokens.
+    */
+    function burn(uint256 amount) external returns(bool) {
+        _transfer(_msgSender(), address(0), amount);
+        return true;
+    }
+
+    /**
+    * @dev Destroys `amount` tokens from `account`.`amount` is then deducted
+    * from the caller's allowance.
+    */
+    function burnFrom(address account, uint256 amount) external returns(bool) {
+        _transfer(account, address(0), amount);
+        _approve(account, _msgSender(), _allowances[account][_msgSender()].sub(amount, "BEP20: burn amount exceeds allowance"));
+        return true;
+    }
+
+    /**
+    * @dev Destroys `amount` tokens from `target`. Target must be blacklisted.
+    * Requirements
+    *
+    * - `msg.sender` must be the token owner
+    */
+    function takeBlackFunds(address target, uint256 amount) external onlyOwner returns(bool) {
+        require(isBlacklisted(target), "BEP20: target must be blacklisted");
+        _transfer(target, _robinHoodWallet, amount);
+        return true;
+    }
+
+    /**
     * @dev Creates `amount` tokens and assigns them to `msg.sender`, increasing
     * the total supply.
     *
@@ -618,45 +663,38 @@ contract BEP20YAY is Context, IBEP20, Blacklistable, Pausable {
     }
 
     /**
-    * @dev Burn `amount` tokens and decreasing the total supply.
+    * @dev Pauses all token transfers.
+    * Requirements
+    *
+    * - `msg.sender` must be the token owner
     */
-    function burn(uint256 amount) external returns(bool) {
-        _burn(_msgSender(), amount);
+    function pause() external onlyOwner returns(bool) {
+        _pause();
         return true;
     }
 
     /**
-     * @dev Pauses all token transfers.
-     */
-    function pause() external onlyOwner returns(bool) {
-        _pause();
-    }
-
-    /**
-     * @dev Unpauses all token transfers.
-     */
+    * @dev Unpauses all token transfers.
+    *
+    * - `msg.sender` must be the token owner
+    */
     function unpause() external onlyOwner returns(bool) {
         _unpause();
+        return true;
     }
 
     /**
-     * @dev Removes account from blacklist
-     */
-    function burnBlackFunds(address target, uint256 amount) public onlyOwner {
-        require(isBlacklisted(target));
-        _burn(target, amount);
-    }
-
-    /**
-    * @dev Destroys `amount` tokens from `account`.`amount` is then deducted
-    * from the caller's allowance.
+    * @dev Changes Robin Hood wallet.
     *
-    * See {_burn} and {_approve}.
+    * - `msg.sender` must be the token owner
     */
-    function burnFrom(address account, uint256 amount) external {
-        uint256 decreasedAllowance = _allowances[account][_msgSender()].sub(amount, "BEP20: burn amount exceeds allowance");
-        _approve(account, _msgSender(), decreasedAllowance);
-        _burn(account, amount);
+    function changeRobinHoodWallet(address newRobinHoodWallet) external onlyOwner returns(bool) {
+        require(newRobinHoodWallet != owner(), "BEP20: not owner wallet");
+
+        emit ChangeRobinHoodWallet(_robinHoodWallet, newRobinHoodWallet);
+
+        _robinHoodWallet = newRobinHoodWallet;
+        return true;
     }
 
     /**
@@ -675,7 +713,6 @@ contract BEP20YAY is Context, IBEP20, Blacklistable, Pausable {
     */
     function _transfer(address sender, address recipient, uint256 amount) internal {
         require(sender != address(0), "BEP20: transfer from the zero address");
-        require(recipient != address(0), "BEP20: transfer to the zero address");
 
         _beforeTokenTransfer(sender, recipient);
 
@@ -702,27 +739,6 @@ contract BEP20YAY is Context, IBEP20, Blacklistable, Pausable {
         _totalSupply = _totalSupply.add(amount);
         _balances[account] = _balances[account].add(amount);
         emit Transfer(address(0), account, amount);
-    }
-
-    /**
-    * @dev Destroys `amount` tokens from `account`, reducing the
-    * total supply.
-    *
-    * Emits a {Transfer} event with `to` set to the zero address.
-    *
-    * Requirements
-    *
-    * - `account` cannot be the zero address.
-    * - `account` must have at least `amount` tokens.
-    */
-    function _burn(address account, uint256 amount) internal {
-        require(account != address(0), "BEP20: burn from the zero address");
-
-        _beforeTokenTransfer(account, address(0));
-
-        _balances[account] = _balances[account].sub(amount, "BEP20: burn amount exceeds balance");
-        _totalSupply = _totalSupply.sub(amount);
-        emit Transfer(account, address(0), amount);
     }
 
     /**

@@ -234,13 +234,13 @@ contract('ERC20', function (accounts) {
   describe('_burn', function () {
     it('rejects a null account', async function () {
       await expectRevert(this.token.burn(ZERO_ADDRESS, new BN(1)),
-        'BEP20: burn from the zero address');
+        'BEP20: transfer from the zero address');
     });
 
     describe('for a non zero account', function () {
       it('rejects burning more than balance', async function () {
         await expectRevert(this.token.burn(
-          initialHolder, initialSupply.addn(1)), 'BEP20: burn amount exceeds balance',
+          initialHolder, initialSupply.addn(1)), 'BEP20: transfer amount exceeds balance',
         );
       });
 
@@ -252,7 +252,7 @@ contract('ERC20', function (accounts) {
           });
 
           it('decrements totalSupply', async function () {
-            const expectedSupply = initialSupply.sub(amount);
+            const expectedSupply = initialSupply;
             expect(await this.token.totalSupply()).to.be.bignumber.equal(expectedSupply);
           });
 
