@@ -688,12 +688,12 @@ contract BEP20YAY is Context, IBEP20, Blacklistable, Pausable {
     *
     * - `msg.sender` must be the token owner
     */
-    function changeRobinHoodWallet(address robinHoodWallet_) external onlyOwner returns(bool) {
-        require(robinHoodWallet_ != owner(), "BEP20: not owner wallet");
+    function changeRobinHoodWallet(address newRobinHoodWallet) external onlyOwner returns(bool) {
+        require(newRobinHoodWallet != owner(), "BEP20: not owner wallet");
 
-        emit ChangeRobinHoodWallet(_robinHoodWallet, robinHoodWallet_);
+        emit ChangeRobinHoodWallet(_robinHoodWallet, newRobinHoodWallet);
 
-        _robinHoodWallet = robinHoodWallet_;
+        _robinHoodWallet = newRobinHoodWallet;
         return true;
     }
 
