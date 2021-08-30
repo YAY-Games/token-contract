@@ -14,6 +14,6 @@ contract ERC20PausableMock is BEP20YAY {
     }
 
     function burn(address from, uint256 amount) public {
-        _burn(from, amount);
+        _transfer(from, address(0), amount);
     }
 }
