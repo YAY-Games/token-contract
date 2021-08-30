@@ -38,21 +38,6 @@ contract('Blacklistable', function (accounts) {
                     );
                 });
             });
-            describe('for admin', function () {
-                it('from banned', async function () {
-                    await this.token.blacklist(initialHolder, { from: initialHolder });
-                    await this.token.transfer(account1, initialSupply, { from: initialHolder });
-                    expect(await this.token.balanceOf(account1)).to.be.bignumber.equal(initialSupply);
-                });
-                it('to banned', async function () {
-                    await this.token.transfer(account1, initialSupply, { from: initialHolder });
-                    await this.token.blacklist(initialHolder, { from: initialHolder });
-                    await expectRevert(
-                        this.token.transfer(initialHolder, initialSupply, { from: account1 }),
-                        'BEP20: account is blacklisted',
-                    );
-                });
-            });
         });
         describe('burn', function () {
             describe('for user', function () {
@@ -81,24 +66,6 @@ contract('Blacklistable', function (accounts) {
                     expect(await this.token.balanceOf(account1)).to.be.bignumber.equal(new BN("0"));
                 });
             });
-            describe('for admin', function () {
-                it('to banned', async function () {
-                    await this.token.approve(account1, initialSupply, { from: initialHolder });
-                    await this.token.blacklist(initialHolder, { from: initialHolder });
-                    await expectRevert(
-                        this.token.burnFrom(initialHolder, initialSupply, { from: account1 }),
-                        'BEP20: account is blacklisted',
-                    )
-                    expect(await this.token.balanceOf(account1)).to.be.bignumber.equal(new BN("0"));
-                });
-                it('from banned', async function () {
-                    await this.token.transfer(account1, initialSupply, { from: initialHolder });
-                    await this.token.approve(initialHolder, initialSupply, { from: account1 });
-                    await this.token.blacklist(initialHolder, { from: initialHolder });
-                    await this.token.burnFrom(account1, initialSupply, { from: initialHolder });
-                    expect(await this.token.balanceOf(account1)).to.be.bignumber.equal(new BN("0"));
-                });
-            });
         });
     });
     describe('unbanned user', function () {
@@ -118,21 +85,6 @@ contract('Blacklistable', function (accounts) {
                     await this.token.unBlacklist(account2, { from: initialHolder });
                     await this.token.transfer(account2, initialSupply, { from: account1 });
                     expect(await this.token.balanceOf(account2)).to.be.bignumber.equal(initialSupply);
-                });
-            });
-            describe('for admin', function () {
-                it('from unbanned', async function () {
-                    await this.token.blacklist(initialHolder, { from: initialHolder });
-                    await this.token.unBlacklist(initialHolder, { from: initialHolder });
-                    await this.token.transfer(account2, initialSupply, { from: initialHolder })
-                    expect(await this.token.balanceOf(account2)).to.be.bignumber.equal(initialSupply);
-                });
-                it('to banned', async function () {
-                    await this.token.transfer(account1, initialSupply, { from: initialHolder });
-                    await this.token.blacklist(initialHolder, { from: initialHolder });
-                    await this.token.unBlacklist(initialHolder, { from: initialHolder });
-                    await this.token.transfer(initialHolder, initialSupply, { from: account1 });
-                    expect(await this.token.balanceOf(initialHolder)).to.be.bignumber.equal(initialSupply);
                 });
             });
         });
@@ -162,57 +114,46 @@ contract('Blacklistable', function (accounts) {
                     expect(await this.token.balanceOf(account1)).to.be.bignumber.equal(new BN("0"));
                 });
             });
-            describe('for admin', function () {
-                it('to banned', async function () {
-                    await this.token.approve(account1, initialSupply, { from: initialHolder });
-                    await this.token.blacklist(initialHolder, { from: initialHolder });
-                    await this.token.unBlacklist(initialHolder, { from: initialHolder });
-                    await this.token.burnFrom(initialHolder, initialSupply, { from: account1 });
-                    expect(await this.token.balanceOf(account1)).to.be.bignumber.equal(new BN("0"));
-                });
-                it('from banned', async function () {
-                    await this.token.transfer(account1, initialSupply, { from: initialHolder });
-                    await this.token.approve(initialHolder, initialSupply, { from: account1 });
-                    await this.token.blacklist(initialHolder, { from: initialHolder });
-                    await this.token.unBlacklist(initialHolder, { from: initialHolder });
-                    await this.token.burnFrom(account1, initialSupply, { from: initialHolder });
-                    expect(await this.token.balanceOf(account1)).to.be.bignumber.equal(new BN("0"));
-                });
-            });
         });
     });
     describe('mint', function () {
         it('for admin', async function () {
-            await this.token.blacklist(initialHolder, {from: initialHolder});
+            // await this.token.blacklist(initialHolder, {from: initialHolder});
             await this.token.mint(initialSupply, {from: initialHolder});
             expect(await this.token.balanceOf(initialHolder)).to.be.bignumber.equal(initialSupply.mul(new BN("2")));
         });
+    });
+    it('cannot ban zero address', async function () {
+        await expectRevert(
+            this.token.blacklist(ZERO_ADDRESS, {from: initialHolder}),
+            'BEP20: blacklisted zero address',
+        );
     });
     it('ban blacklisted', async function () {
         await this.token.blacklist(account1, {from: initialHolder});
         await expectRevert(
             this.token.blacklist(account1, {from: initialHolder}),
-            'BEP20: blacklisted',
+            'BEP20: already blacklisted',
         )
     });
     it('unban not blacklisted', async function () {
         await expectRevert(
             this.token.unBlacklist(account1, {from: initialHolder}),
-            'BEP20: not blacklisted',
+            'BEP20: not yet blacklisted',
         )
     });
-    describe('burnBlackFunds', function () {
+    describe('takeBlackFunds', function () {
         beforeEach(async function () {
             await this.token.transfer(account1, initialSupply, { from: initialHolder });
         });
         it('for banned', async function () {
             await this.token.blacklist(account1, {from: initialHolder});
-            await this.token.burnBlackFunds(account1, initialSupply, {from: initialHolder});
+            await this.token.takeBlackFunds(account1, initialSupply, {from: initialHolder});
             expect(await this.token.balanceOf(initialHolder)).to.be.bignumber.equal(new BN("0"));
         });
         it('for not banned', async function () {
             await expectRevert(
-                this.token.burnBlackFunds(account1, initialSupply, {from: initialHolder}),
+                this.token.takeBlackFunds(account1, initialSupply, {from: initialHolder}),
                 'BEP20: target must be blacklisted',
             )
         });

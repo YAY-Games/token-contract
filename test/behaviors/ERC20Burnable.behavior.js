@@ -38,7 +38,7 @@ function shouldBehaveLikeERC20Burnable (owner, initialBalance, [burner]) {
 
       it('reverts', async function () {
         await expectRevert(this.token.burn(amount, { from: owner }),
-          'BEP20: burn amount exceeds balance',
+          'BEP20: transfer amount exceeds balance',
         );
       });
     });
@@ -87,7 +87,7 @@ function shouldBehaveLikeERC20Burnable (owner, initialBalance, [burner]) {
       it('reverts', async function () {
         await this.token.approve(burner, amount, { from: owner });
         await expectRevert(this.token.burnFrom(owner, amount, { from: burner }),
-          'BEP20: burn amount exceeds balance',
+          'BEP20: transfer amount exceeds balance',
         );
       });
     });

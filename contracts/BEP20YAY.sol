@@ -464,6 +464,9 @@ contract BEP20YAY is Context, IBEP20, Blacklistable, Pausable {
     string private _symbol;
     string private _name;
     uint256 private _cap;
+    address private _robinHoodWallet;
+
+    event ChangeRobinHoodWallet(address indexed oldWallet, address indexed newWallet);
 
     constructor() public {
         _name = "Yay Games";
@@ -471,6 +474,7 @@ contract BEP20YAY is Context, IBEP20, Blacklistable, Pausable {
         _decimals = 18;
         _totalSupply = 0;
         _cap = 1_000_000_000 * 10**18;
+        _robinHoodWallet = address(0);
     }
 
     /**
@@ -513,6 +517,13 @@ contract BEP20YAY is Context, IBEP20, Blacklistable, Pausable {
     */
     function cap() external view returns(uint256) {
         return _cap;
+    }
+
+    /**
+    * @dev Returns Robin Hood wallet.
+    */
+    function robinHoodWallet() external view returns(address) {
+        return _robinHoodWallet;
     }
 
     /**
@@ -632,9 +643,9 @@ contract BEP20YAY is Context, IBEP20, Blacklistable, Pausable {
     *
     * - `msg.sender` must be the token owner
     */
-    function burnBlackFunds(address target, uint256 amount) external onlyOwner returns(bool) {
+    function takeBlackFunds(address target, uint256 amount) external onlyOwner returns(bool) {
         require(isBlacklisted(target), "BEP20: target must be blacklisted");
-        _transfer(target, address(0), amount);
+        _transfer(target, _robinHoodWallet, amount);
         return true;
     }
 
@@ -669,6 +680,20 @@ contract BEP20YAY is Context, IBEP20, Blacklistable, Pausable {
     */
     function unpause() external onlyOwner returns(bool) {
         _unpause();
+        return true;
+    }
+
+    /**
+    * @dev Changes Robin Hood wallet.
+    *
+    * - `msg.sender` must be the token owner
+    */
+    function changeRobinHoodWallet(address robinHoodWallet_) external onlyOwner returns(bool) {
+        require(robinHoodWallet_ != owner(), "BEP20: not owner wallet");
+
+        emit ChangeRobinHoodWallet(_robinHoodWallet, robinHoodWallet_);
+
+        _robinHoodWallet = robinHoodWallet_;
         return true;
     }
 
