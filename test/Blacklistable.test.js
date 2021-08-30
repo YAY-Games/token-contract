@@ -136,6 +136,12 @@ contract('Blacklistable', function (accounts) {
             'BEP20: already blacklisted',
         )
     });
+    it('ban owner', async function () {
+        await expectRevert(
+            this.token.blacklist(initialHolder, {from: initialHolder}),
+            'BEP20: blacklisted owner',
+        )
+    });
     it('unban not blacklisted', async function () {
         await expectRevert(
             this.token.unBlacklist(account1, {from: initialHolder}),
