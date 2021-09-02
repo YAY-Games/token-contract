@@ -10,7 +10,7 @@
 
 ### Deployed
 
-- Coming soon
+[Binance Smart Chain](https://bscscan.com/token/0x524dF384BFFB18C0C8f3f43d012011F8F9795579)
 
 ## Installation & Usage
 

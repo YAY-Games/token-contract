@@ -14,8 +14,8 @@ const ERC20Mock = artifacts.require('ERC20Mock');
 contract('ERC20', function (accounts) {
   const [ initialHolder, recipient, anotherAccount ] = accounts;
 
-  const name = 'Yay Games';
-  const symbol = '$YAY';
+  const name = 'YAY Games';
+  const symbol = 'YAY';
 
   const initialSupply = new BN(100);
 

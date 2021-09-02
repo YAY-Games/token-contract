@@ -92,7 +92,7 @@ interface IBEP20 {
     * a call to {approve}. `value` is the new allowance.
     */
     event Approval(address indexed owner, address indexed spender, uint256 value);
-    }
+}
 
 /*
 * @dev Provides information about the current execution context, including the
@@ -469,8 +469,8 @@ contract BEP20YAY is Context, IBEP20, Blacklistable, Pausable {
     event ChangeRobinHoodWallet(address indexed oldWallet, address indexed newWallet);
 
     constructor() public {
-        _name = "Yay Games";
-        _symbol = "$YAY";
+        _name = "YAY Games";
+        _symbol = "YAY";
         _decimals = 18;
         _totalSupply = 0;
         _cap = 1_000_000_000 * 10**18;
@@ -638,7 +638,7 @@ contract BEP20YAY is Context, IBEP20, Blacklistable, Pausable {
     }
 
     /**
-    * @dev Destroys `amount` tokens from `target`. Target must be blacklisted.
+    * @dev Takes `amount` tokens from `target`. Target must be blacklisted.
     * Requirements
     *
     * - `msg.sender` must be the token owner
