@@ -12,6 +12,10 @@
 
 [Binance Smart Chain](https://bscscan.com/token/0x524dF384BFFB18C0C8f3f43d012011F8F9795579)
 
+
+[Avalanche C-chain (bridged)](https://cchain.explorer.avax.network/address/0x01C2086faCFD7aA38f69A6Bd8C91BEF3BB5adFCa/)
+
+
 ## Installation & Usage
 
 1. Install packages
