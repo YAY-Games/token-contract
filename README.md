@@ -1,5 +1,9 @@
 # $YAY token smart contract
 
+[![hardhatProject](https://github.com/YAY-Games/token-contract/actions/workflows/hardhatProject.yaml/badge.svg)](https://github.com/YAY-Games/token-contract/actions/workflows/hardhatProject.yaml)
+[![codecov](https://codecov.io/gh/YAY-Games/token-contract/branch/master/graph/badge.svg?token=sdsAmkTzOF)](https://codecov.io/gh/YAY-Games/token-contract)
+
+
 - Language: Solidity v0.6.12
 
 - Project framework: hardhat + truffle / web3
